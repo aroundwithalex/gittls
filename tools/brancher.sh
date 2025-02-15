@@ -9,7 +9,7 @@ DEFAULT_BRANCH=$3
 
 
 for repo in $TARGET_DIR/*; do
-    cd repo
+    cd $repo
 
     if [[ -n $(git status --porcelain) ]]; then
         git stash
@@ -18,8 +18,6 @@ for repo in $TARGET_DIR/*; do
     if [[ $DEFAULT_BRANCH != $(git branch --show-current) ]]; then
         git checkout $DEFAULT_BRANCH
     fi
-
-    git pull
 
     git checkout -b $BRANCH_NAME
 
