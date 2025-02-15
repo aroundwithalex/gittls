@@ -7,8 +7,7 @@ BRANCH_NAME=$1
 TARGET_DIR=$2
 DEFAULT_BRANCH=$3
 
-
-for repo in $TARGET_DIR/*; do
+for repo in $TARGET_DIR/*/; do
     cd $repo
 
     if [[ -n $(git status --porcelain) ]]; then

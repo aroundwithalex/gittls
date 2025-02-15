@@ -16,7 +16,7 @@ if [[ $COMMAND == "branch" ]]; then
     if [[ -z "$TARGET_DIR" ]]; then
         printf "$(tput setaf 1) Please specify target directory."
         exit 1
-    elif [[ -d "$TARGET_DIR" ]]; then
+    elif [[ ! -d "$TARGET_DIR" ]]; then
         printf "$(tput setaf 1) $TARGET_DIR does not exist."
         exit 1
     fi
