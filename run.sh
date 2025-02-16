@@ -13,13 +13,7 @@ if [[ $COMMAND == "branch" ]]; then
 
     TARGET_DIR=$4
 
-    if [[ -z "$TARGET_DIR" ]]; then
-        printf "$(tput setaf 1) Please specify target directory."
-        exit 1
-    elif [[ ! -d "$TARGET_DIR" ]]; then
-        printf "$(tput setaf 1) $TARGET_DIR does not exist."
-        exit 1
-    fi
+    dir_exists $TARGET_DIR
 
     DEFAULT_BRANCH=$6
 
@@ -28,5 +22,16 @@ if [[ $COMMAND == "branch" ]]; then
     fi
 
     $(pwd)/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
-
+elif [[ $COMMAND == "clone" ]]; then
+    $(pwd)/tools/cloner.sh
 fi
+
+function dir_exists() {
+    if [[ -z $1 ]]; then
+        printf "$(tput setaf 1)\nPlease specify a target directory\n"
+        exit 1
+    elif [[ ! -d $1 ]]; then
+        printf "$(tput setaf 1)\n$1 does not exist\n"
+        exit 1
+    fi
+}
