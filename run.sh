@@ -44,4 +44,19 @@ if [[ $COMMAND == "branch" ]]; then
     $(pwd)/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
 elif [[ $COMMAND == "clone" ]]; then
     $(pwd)/tools/cloner.sh
+elif [[ $COMMAND == "config" ]]; then
+    if [ $# -eq 3 ]; then
+        EMAIL=$2
+        NAME=$3
+    elif [ $# -eq 5 ]; then
+        EMAIL=$3
+        NAME=$5
+    else
+        printf "$(tput setaf 1)\nIllegal number of arguments\n"
+        printf "$(tput setaf 1)\nTypical Usage:\n"
+        printf "$(tput setaf 1)\n\tgittls --config email@address \"Your Name\"\n\n"
+        exit 1
+    fi
+
+    $(pwd)/tools/config.sh $EMAIL $NAME
 fi
