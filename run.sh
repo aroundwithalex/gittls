@@ -47,7 +47,7 @@ if [[ $COMMAND == "branch" ]]; then
 elif [[ $COMMAND == "clone" ]]; then
     source $INSTALL_PATH/tools/cloner.sh
 elif [[ $COMMAND == "help" ]]; then 
-    source $INSTALL_PATH/tools/help.sh
+    source $INSTALL_PATH/help.sh
 elif [[ $COMMAND == "config" ]]; then
     if [ $# -eq 3 ]; then
         EMAIL=$2
