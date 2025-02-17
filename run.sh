@@ -43,9 +43,9 @@ if [[ $COMMAND == "branch" ]]; then
         DEFAULT_BRANCH="main"
     fi
 
-    $DEFAULT_PATH/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
+    $INSTALL_PATH/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
 elif [[ $COMMAND == "clone" ]]; then
-    $DEFAULT_PATH/tools/cloner.sh
+    $INSTALL_PATH/tools/cloner.sh
 elif [[ $COMMAND == "config" ]]; then
     if [ $# -eq 3 ]; then
         EMAIL=$2
@@ -60,5 +60,5 @@ elif [[ $COMMAND == "config" ]]; then
         exit 1
     fi
 
-    $DEFAULT_PATH/tools/config.sh $EMAIL $NAME
+    $INSTALL_PATH/tools/config.sh $EMAIL $NAME
 fi
