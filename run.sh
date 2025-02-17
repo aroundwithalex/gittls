@@ -46,6 +46,8 @@ if [[ $COMMAND == "branch" ]]; then
     $INSTALL_PATH/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
 elif [[ $COMMAND == "clone" ]]; then
     source $INSTALL_PATH/tools/cloner.sh
+elif [[ $COMMAND == "help" ]]; then 
+    source $INSTALL_PATH/tools/help.sh
 elif [[ $COMMAND == "config" ]]; then
     if [ $# -eq 3 ]; then
         EMAIL=$2
