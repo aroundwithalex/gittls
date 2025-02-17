@@ -75,7 +75,7 @@ done
 PUBLIC_DIR=$HOME/Development/Public
 mkdir -p $PUBLIC_DIR
 for repo in $(get_gh_repos "public" $ORG_NAME); do
-    clone_or_pull $PUBLIC_DIR $repo
+    clone_or_pull $PUBLIC_nameDIR $repo
 done
 
 #TODO: Create a path generator
