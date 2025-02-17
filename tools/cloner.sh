@@ -66,26 +66,26 @@ function clone_or_pull() {
 
 ORG_NAME=''
 
-PRIVATE_DIR=$HOME/Development/Private
+PRIVATE_DIR=~/Development/Private
 mkdir -p $PRIVATE_DIR
 for repo in $(get_gh_repos "private" $ORG_NAME); do
     clone_or_pull $PRIVATE_DIR $repo
 done
 
-PUBLIC_DIR=$HOME/Development/Public
+PUBLIC_DIR=~/Development/Public
 mkdir -p $PUBLIC_DIR
 for repo in $(get_gh_repos "public" $ORG_NAME); do
-    clone_or_pull $PUBLIC_nameDIR $repo
+    clone_or_pull $PUBLIC_DIR $repo
 done
 
 #TODO: Create a path generator
-FORK_DIR=$HOME/Development/Forks
+FORK_DIR=~/Development/Forks
 mkdir -p $FORK_DIR
 for repo in $(gh repo list --fork $ORG_NAME); do
     clone_or_pull $FORK_DIR $repo
 done
 
-ARCHIVE_DIR=$HOME/Development/Archive
+ARCHIVE_DIR=~/Development/Archive
 mkdir -p $ARCHIVE_DIR
 for repo in $(gh repo list --archived $ORG_NAME); do
     clone_or_pull $ARCHIVE_DIR $repo
