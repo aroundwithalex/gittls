@@ -16,7 +16,11 @@ function get_gh_repos() {
     # GitHub CLI only supports public, private and internal as
     # arguments.
 
-    echo $(gh repo list --visibility $1 --json name --jq '.[].name')
+    if [ -z $2 ]; then
+        echo $(gh repo list --visibility $1 --json name --jq '.[].name')
+    else
+        echo $(gh repo list $2 --visibility $1 --json name --jq '.[].name')
+    fi
 }
 
 function clone_or_pull() {
@@ -60,27 +64,29 @@ function clone_or_pull() {
 
 }
 
+ORG_NAME=''
+
 PRIVATE_DIR=$HOME/Development/Private
 mkdir -p $PRIVATE_DIR
-for repo in $(get_gh_repos "private"); do
+for repo in $(get_gh_repos "private" $ORG_NAME); do
     clone_or_pull $PRIVATE_DIR $repo
 done
 
 PUBLIC_DIR=$HOME/Development/Public
 mkdir -p $PUBLIC_DIR
-for repo in $(get_gh_repos "public"); do
+for repo in $(get_gh_repos "public" $ORG_NAME); do
     clone_or_pull $PUBLIC_DIR $repo
 done
 
 #TODO: Create a path generator
 FORK_DIR=$HOME/Development/Forks
 mkdir -p $FORK_DIR
-for repo in $(gh repo list --fork); do
+for repo in $(gh repo list --fork $ORG_NAME); do
     clone_or_pull $FORK_DIR $repo
 done
 
 ARCHIVE_DIR=$HOME/Development/Archive
 mkdir -p $ARCHIVE_DIR
-for repo in $(gh repo list --archived); do
+for repo in $(gh repo list --archived $ORG_NAME); do
     clone_or_pull $ARCHIVE_DIR $repo
 done
