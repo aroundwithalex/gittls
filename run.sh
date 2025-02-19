@@ -8,29 +8,47 @@ function dir_exists() {
         printf "$(tput setaf 1)\nPlease specify a target directory\n"
         exit 1
     elif [[ ! -d $1 ]]; then
-        printf "$(tput setaf 1)\n$1 does not exist\n"
+        printf "$(tput setaf 1)\nDirectory $1 does not exist\n"
         exit 1
     fi
 }
 
-INSTALL_PATH=~/.local/share/gittls
+function parse_args() {
 
-if [[ $COMMAND == "branch" ]]; then
+    MIN_ARGS=${!#}
+    MAX_ARGS=$(( MIN_ARGS * 2 ))
 
-    if [ $# -eq 4 ]; then
-        NAME=$2
-        TARGET_DIR=$3
-        DEFAULT_BRANCH=$4
-    elif [ $# -eq 6 ]; then
-        NAME=$2
-        TARGET_DIR=$4
-        DEFAULT_BRANCH=$6   
+    # First arg is going to be the
+    # command. Ignore.
+    shift
+    args=("$@")
+
+    # Last arg is the expected argument
+    # count. Remove.
+    unset 'args[-1]'
+
+    COUNT=${#args[@]}
+
+    if (( $COUNT == $MIN_ARGS  )); then
+        for arg in "${args[@]}"; do
+            parsed_args+=("$arg")
+        done
+    elif (( $COUNT == $MAX_ARGS )); then
+        for i in $(seq 1 2 "$MAX_ARGS"); do
+            parsed_args+=("${args[i]}")
+        done
     else
-        printf "$(tput setaf 1)\nIllegal number of arguments\n"
-        printf "$(tput setaf 1)\nTypical Usage:\n"
-        printf "$(tput setaf 1)\n\tgittls --branch test-branch /target/dir main\n\n"
+        printf "$(tput setaf 1)\nIllegal number of arguments supplied.\n"
+        printf "$(tput setaf 1)\nExpected $MIN_ARGS or $MAX_ARGS args, got $COUNT\n"
         exit 1
     fi
+}
+
+function brancher() {
+
+    NAME=$1
+    TARGET_DIR=$2
+    DEFAULT_BRANCH=$3
 
     if [[ -z "$NAME" ]]; then
         printf "$(tput setaf 1) Please specify branch name."
@@ -44,23 +62,42 @@ if [[ $COMMAND == "branch" ]]; then
     fi
 
     $INSTALL_PATH/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
-elif [[ $COMMAND == "clone" ]]; then
-    source $INSTALL_PATH/tools/cloner.sh
-elif [[ $COMMAND == "help" ]]; then 
-    source $INSTALL_PATH/help.sh
-elif [[ $COMMAND == "config" ]]; then
-    if [ $# -eq 3 ]; then
-        EMAIL=$2
-        NAME=$3
-    elif [ $# -eq 5 ]; then
-        EMAIL=$3
-        NAME=$5
-    else
-        printf "$(tput setaf 1)\nIllegal number of arguments\n"
-        printf "$(tput setaf 1)\nTypical Usage:\n"
-        printf "$(tput setaf 1)\n\tgittls --config email@address \"Your Name\"\n\n"
-        exit 1
-    fi
 
+}
+
+function cloner() {
+    TARGET_DIR=$1
+    source $INSTALL_PATH/tools/cloner.sh $TARGET_DIR
+}
+
+function config() {
+    EMAIL=$1
+    NAME=$2
     source $INSTALL_PATH/tools/config.sh $EMAIL $NAME
-fi
+}
+
+function show_help() {
+    source $INSTALL_PATH/help.sh
+}
+
+INSTALL_PATH=~/.local/share/gittls
+
+declare -a parsed_args
+
+case $COMMAND in
+    'branch')
+        parse_args "$@" 3
+        brancher "${parsed_args[0]}" "${parsed_args[1]}" "${parsed_args[2]}"
+        ;;
+    'clone')
+        parse_args "$@" 1
+        cloner "${parsed_args[0]}"
+        ;;  
+    'config')
+        parse_args "$@" 2
+        config "${parsed_args[0]}" "${parsed_args[1]}"
+        ;;
+    *)
+        show_help
+        ;;
+esac

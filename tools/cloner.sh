@@ -64,29 +64,38 @@ function clone_or_pull() {
 
 }
 
+function make_repo() {
+
+    DIR_PATH=$1/$2
+    mkdir -p $DIR_PATH
+
+    echo $DIR_PATH
+}
+
+TARGET_DIR=$1
+
+if [ -z $TARGET_DIR ]; then
+    TARGET_DIR=~/Development
+fi
+
 ORG_NAME=''
 
-PRIVATE_DIR=~/Development/Private
-mkdir -p $PRIVATE_DIR
+DIR_PATH=$(make_repo $TARGET_DIR "Private")
 for repo in $(get_gh_repos "private" $ORG_NAME); do
-    clone_or_pull $PRIVATE_DIR $repo
+    clone_or_pull $DIR_PATH $repo
 done
 
-PUBLIC_DIR=~/Development/Public
-mkdir -p $PUBLIC_DIR
+DIR_PATH=$(make_repo $TARGET_DIR "Public")
 for repo in $(get_gh_repos "public" $ORG_NAME); do
-    clone_or_pull $PUBLIC_DIR $repo
+    clone_or_pull $DIR_PATH $repo
 done
 
-#TODO: Create a path generator
-FORK_DIR=~/Development/Forks
-mkdir -p $FORK_DIR
+DIR_PATH=$(make_repo $TARGET_DIR "Forks")
 for repo in $(gh repo list --fork $ORG_NAME); do
-    clone_or_pull $FORK_DIR $repo
+    clone_or_pull $DIR_PATH $repo
 done
 
-ARCHIVE_DIR=~/Development/Archive
-mkdir -p $ARCHIVE_DIR
+DIR_PATH=$(make_repo $TARGET_DIR "Archive")
 for repo in $(gh repo list --archived $ORG_NAME); do
-    clone_or_pull $ARCHIVE_DIR $repo
+    clone_or_pull $DIR_PATH $repo
 done
