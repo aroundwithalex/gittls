@@ -74,10 +74,6 @@ function make_repo() {
 
 TARGET_DIR=$1
 
-if [ -z $TARGET_DIR ]; then
-    TARGET_DIR=~/Development
-fi
-
 ORG_NAME=''
 
 DIR_PATH=$(make_repo $TARGET_DIR "Private")
