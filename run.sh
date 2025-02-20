@@ -61,19 +61,23 @@ function brancher() {
         DEFAULT_BRANCH="main"
     fi
 
-    $INSTALL_PATH/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
+    $(pwd)/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
 
 }
 
 function cloner() {
     TARGET_DIR=$1
-    source $INSTALL_PATH/tools/cloner.sh $TARGET_DIR
+    source $(pwd)/tools/cloner.sh $TARGET_DIR
 }
 
 function config() {
     EMAIL=$1
     NAME=$2
-    source $INSTALL_PATH/tools/config.sh $EMAIL $NAME
+    source $(pwd)/tools/config.sh $EMAIL $NAME
+}
+
+function ssh_adder() {
+    source $(pwd)/tools/ssh_adder.sh
 }
 
 function show_help() {
@@ -97,6 +101,8 @@ case $COMMAND in
         parse_args "$@" 2
         config "${parsed_args[0]}" "${parsed_args[1]}"
         ;;
+    'ssh-adder')
+        ssh_adder  
     *)
         show_help
         ;;
