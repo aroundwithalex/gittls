@@ -56,7 +56,7 @@ for repo in $TARGET_DIR/*/; do
         continue
     fi
 
-    if [ -n "$HAS_CHANGES" && "$PREV_BRANCH" != "$TARGET_BRANCH" ]; then
+    if [[ -n "$HAS_CHANGES" && "$PREV_BRANCH" != "$TARGET_BRANCH" ]]; then
         git checkout -q $PREV_BRANCH
 
         if ! git -C $repo stash pop; then
