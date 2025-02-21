@@ -74,6 +74,14 @@ function make_repo() {
 
 TARGET_DIR=$1
 
+if [ -z "$TARGET_DIR" ]; then
+    printf "$(tput setaf 1)\nPlease specify target directory\n"
+    exit 1
+elif [ ! -d "$TARGET_DIR" ]; then
+    printf "$(tput setaf 1)\n$TARGET_DIR does not exist\n"
+    exit
+fi
+
 ORG_NAME=''
 
 DIR_PATH=$(make_repo $TARGET_DIR "Private")
