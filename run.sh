@@ -82,7 +82,7 @@ function ssh_adder() {
 
 function pull() {
     TARGET_BRANCH=$1
-    TARGET_DIR=$1
+    TARGET_DIR=$2
     source $(pwd)/tools/puller.sh $TARGET_BRANCH $TARGET_DIR
 }
 
@@ -113,6 +113,7 @@ case $COMMAND in
     'pull')
         parse_args "$@" 2
         pull "${parsed_args[0]}" "${parsed_args[1]}"
+        ;;
     *)
         show_help
         ;;
