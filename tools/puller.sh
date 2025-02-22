@@ -38,7 +38,9 @@ for repo in $TARGET_DIR/*/; do
     HAS_CHANGES=$(git status --porcelain)
     PREV_BRANCH=$(git branch --show-current)
 
-    if [ -n "$HAS_CHANGES" ] && ! git -C $repo stash; then
+    if [ -n "$HAS_CHANGES" ] && git -C $repo stash; then
+        printf "$(tput setaf 2)\nStashed changes\n"
+    else
         printf "$(tput setaf 1)\nUnable to stash changes in $repo\n"
         printf "$(tput setaf 1)\nContinuing\n"
         continue
@@ -56,10 +58,12 @@ for repo in $TARGET_DIR/*/; do
         continue
     fi
 
-    if [[ -n "$HAS_CHANGES" && "$PREV_BRANCH" != "$TARGET_BRANCH" ]]; then
+    if [ -n "$HAS_CHANGES" ]; then
         git checkout -q $PREV_BRANCH
 
-        if ! git -C $repo stash pop; then
+        if git -C $repo stash pop; then
+            printf "$(tput setaf 2)\nUnstashed changes\n"
+        else
             printf "$(tput setaf 1)\nUnable to unstash changes\n"
             printf "$(tput setaf 1)\nContinuing\n"
             continue
