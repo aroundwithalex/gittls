@@ -35,38 +35,76 @@ function clone_or_pull() {
     if [ ! -d $REPO_PATH ]; then
         printf "$(tput setaf 2)\nCloning $REPO_NAME to $REPO_PATH\n"
         gh repo clone $repo $REPO_PATH
-    else
-        cd $REPO_PATH
+        exit 1
+    fi
 
-        DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin | cut -d '/' -f2)
+    cd $REPO_PATH
 
-        printf "$(tput setaf 2)\n$REPO_NAME already exists. Updating...\n"
+    printf "$(tput setaf 2)\n$REPO_NAME already exists. Updating...\n"
 
-        PREV_BRANCH=''
+    DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin | cut -d '/' -f2)
 
-        if [ ! $(git branch --show-current) == $DEFAULT_BRANCH ]; then
-            PREV_BRANCH=$(git branch --show-current)
+    PREV_BRANCH=$(git branch --show-current)
+    HAS_CHANGES=$(git status --porcelain)
 
-            if [[ -n $(git status --porcelain) ]] ; then
-                git stash
-            fi
+    if [ "$PREV_BRANCH" != "$DEFAULT_BRANCH" ] && [ -n $HAS_CHANGES ]; then
 
-            git checkout $DEFAULT_BRANCH
+        if git stash; then
+            printf "$(tput setaf 2)\nStashed changes on $PREV_BRANCH in $repo\n"
+        else
+            printf "$(tput setaf 3)\nUnable to stash changes on $PREV_BRANCH in $repo\n"
+            printf "$(tput setaf 3)\nTo avoid losing work, continuing\n"
+            exit 1
         fi
 
-        git pull
-
-        if [ -n "$PREV_BRANCH" ]; then
-            git checkout $PREV_BRANCH
-            git stash pop
+        if git checkout $DEFAULT_BRANCH; then
+            printf "$(tput setaf 2)\nChecked out $DEFAULT_BRANCH\n"
+        else
+            printf "$(tput setaf 3)\nCannot checkout $DEFAULT_BRANCH in $repo\n"
+            printf "$(tput setaf 3)\nPlease look at the repo and find any issues.\n"
+            exit 1
         fi
     fi
 
+    git pull
+
+    if [ -n "$PREV_BRANCH" ]; then
+
+        if git checkout $PREV_BRANCH; then
+            printf "$(tput setaf 2)\nChecked out $PREV_BRANCH in $repo\n"
+        else
+            printf "$(tput setaf 3)\nUnable to checkout $PREV_BRANCH in $repo\n"
+            printf "$(tput setaf 3)\nCannot unstash previous changes. Continuing\n"
+            exit 1
+
+        if git stash pop; then
+            printf "$(tput setaf 2)\nReapplied changes on $PREV_BRANCH in $repo\n"
+        else
+            printf "$(tput setaf 3)\nUnable to unstash changes on $PREV_BRANCH in $repo\n"
+            printf "$(tput setaf 3)\nPlease look at the repo and find any issues.\n"
+            exit 1
+    fi
 }
 
 function make_repo() {
+    # Creates a directory to hold a repository if it
+    # does not already exist.
 
-    DIR_PATH=$1/$2
+    TARGET_DIR=$1
+    NAME=$2
+
+    if [ -z $TARGET_DIR ]; then
+        printf "$(tput setaf 1)\nPlease specify target directory\n"
+        exit 1
+    fi
+
+    if [ -z $NAME ]; then
+        printf "$(tput setaf 1)\nPlease specify directory name\n"
+        exit 1
+    fi
+
+    DIR_PATH=$TARGET_DIR/$NAME
+
     mkdir -p $DIR_PATH
 
     echo $DIR_PATH
@@ -82,7 +120,7 @@ elif [ ! -d "$TARGET_DIR" ]; then
     exit
 fi
 
-ORG_NAME=''
+ORG_NAME=$2
 
 DIR_PATH=$(make_repo $TARGET_DIR "Private")
 for repo in $(get_gh_repos "private" $ORG_NAME); do

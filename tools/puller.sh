@@ -35,38 +35,47 @@ for repo in $TARGET_DIR/*/; do
         continue
     fi
 
+    if ! git remote; then
+        printf "$(tput setaf 3)\n$repo does not have a remote repository\n"
+        printf "$(tput setaf 3)\nPlease set one up before continuing\n"
+        continue
+    fi
+
     HAS_CHANGES=$(git status --porcelain)
     PREV_BRANCH=$(git branch --show-current)
 
     if [ -n "$HAS_CHANGES" ] && git -C $repo stash; then
-        printf "$(tput setaf 2)\nStashed changes\n"
+        printf "$(tput setaf 2)\nStashed changes in $repo\n"
     else
         printf "$(tput setaf 1)\nUnable to stash changes in $repo\n"
         printf "$(tput setaf 1)\nContinuing\n"
         continue
     fi
 
-    if ! git -C $repo checkout $TARGET_BRANCH; then
+    if ! git checkout $TARGET_BRANCH; then
         printf "$(tput setaf 1)\nUnable to checkout $TARGET_BRANCH for $repo\n"
         printf "$(tput setaf 1)\nContinuing\n"
         continue
     fi
 
-    if ! git -C $repo pull; then
+    if ! git pull; then
         printf "$(tput setaf 1)\nUnable to pull $TARGET_BRANCH for $repo\n"
         printf "$(tput setaf 1)\nContinuing\n"
         continue
     fi
 
     if [ -n "$HAS_CHANGES" ]; then
-        git checkout -q $PREV_BRANCH
-
-        if git -C $repo stash pop; then
-            printf "$(tput setaf 2)\nUnstashed changes\n"
-        else
-            printf "$(tput setaf 1)\nUnable to unstash changes\n"
+        
+        if ! git checkout $PREV_BRANCH; then
+            printf "$(tput setaf 1)\nUnable to checkout $PREV_BRANCH in $repo\n"
             printf "$(tput setaf 1)\nContinuing\n"
             continue
+        elif ! git stash pop; then
+            printf "$(tput setaf 2)\nUnstashed changes in $repo\n"
+            printf "$(tput setaf 1)\nContinuing\n"
+            continue
+        else
+            printf "$(tput setaf 2)\nChecked out $PREV_BRANCH on $repo\n"
         fi
     fi
 

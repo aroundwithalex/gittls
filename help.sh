@@ -12,3 +12,5 @@ printf "$(tput setaf 2)\n\t gittls ssh-adder: Creates an SSH key and adds to Git
 printf "$(tput setaf 2)\n\t Example Usage:\n\n\t\tgittls ssh-adder \n\n"
 printf "$(tput setaf 2)\n\t gittls pull: Pulls the same branch across multiple repositories \n"
 printf "$(tput setaf 2)\n\t Example Usage:\n\n\t\tgittls pull main ~/Development \n\n"
+printf "$(tput setaf 2)\n\t gittls push: Pushes the same branch across multiple repositories \n"
+printf "$(tput setaf 2)\n\t Example Usage:\n\n\t\tgittls push main ~/Development \n\n"

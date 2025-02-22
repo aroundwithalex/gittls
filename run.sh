@@ -4,6 +4,8 @@ COMMAND="${1#-}"
 COMMAND="${COMMAND#-}"
 
 function dir_exists() {
+    # Checks to see if a directory argument has been specified
+    # and if the directory exists.
     if [[ -z $1 ]]; then
         printf "$(tput setaf 1)\nPlease specify a target directory\n"
         exit 1
@@ -14,7 +16,11 @@ function dir_exists() {
 }
 
 function parse_args() {
-
+    # Parses arguments into an array that can then be indexed. Ignores
+    # the first argument, which is the command, and the last argument
+    # which is the expected number of arguments. Handles the names of
+    # arguments (e.g., --arg) by doubling the expected number of args
+    # and stepping through two at a time.
     MIN_ARGS=${!#}
     MAX_ARGS=$(( MIN_ARGS * 2 ))
 
@@ -45,7 +51,9 @@ function parse_args() {
 }
 
 function brancher() {
-
+    # Calls the brancher script and passes in command line args
+    # such as the name of the branch, the target directory and
+    # the default branch.
     NAME=$1
     TARGET_DIR=$2
     DEFAULT_BRANCH=$3
@@ -66,28 +74,45 @@ function brancher() {
 }
 
 function cloner() {
+    # Calls the cloner script and passes in command line args, such
+    # as the target directory and (optionally) an organisation.
     TARGET_DIR=$1
-    source $(pwd)/tools/cloner.sh $TARGET_DIR
+    ORG=$2
+    source $(pwd)/tools/cloner.sh $TARGET_DIR $ORG
 }
 
 function config() {
+    # Calls the config script and passes in command line args, such as
+    # the email address and name of the user.
     EMAIL=$1
     NAME=$2
     source $(pwd)/tools/config.sh $EMAIL $NAME
 }
 
 function ssh_adder() {
+    # Calls the SSH adder script.
     source $(pwd)/tools/ssh_adder.sh
 }
 
 function pull() {
+    # Calls the puller script and passes in command line arguments such
+    # as the target branch and the target directory.
     TARGET_BRANCH=$1
     TARGET_DIR=$2
     source $(pwd)/tools/puller.sh $TARGET_BRANCH $TARGET_DIR
 }
 
+function push() {
+    # Calls the pusher script and passes in command line arguments such
+    # as the target branch and the target directory.
+    TARGET_BRANCH=$1
+    TARGET_DIR=$2
+    source $(pwd)/tools/pusher.sh $TARGET_BRANCH $TARGET_DIR
+}
+
 function show_help() {
-    source $INSTALL_PATH/help.sh
+    # Shows the help menu.
+    source $(pwd)/help.sh
 }
 
 INSTALL_PATH=~/.local/share/gittls
@@ -113,6 +138,10 @@ case $COMMAND in
     'pull')
         parse_args "$@" 2
         pull "${parsed_args[0]}" "${parsed_args[1]}"
+        ;;
+    'push')
+        parse_args "$@" 2
+        push "${parsed_args[0]}" "${parsed_args[1]}"
         ;;
     *)
         show_help
