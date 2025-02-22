@@ -80,6 +80,12 @@ function ssh_adder() {
     source $(pwd)/tools/ssh_adder.sh
 }
 
+function pull() {
+    TARGET_BRANCH=$1
+    TARGET_DIR=$1
+    source $(pwd)/tools/puller.sh $TARGET_BRANCH $TARGET_DIR
+}
+
 function show_help() {
     source $INSTALL_PATH/help.sh
 }
@@ -102,7 +108,11 @@ case $COMMAND in
         config "${parsed_args[0]}" "${parsed_args[1]}"
         ;;
     'ssh-adder')
-        ssh_adder  
+        ssh_adder
+        ;;  
+    'pull')
+        parse_args "$@" 2
+        pull "${parsed_args[0]}" "${parsed_args[1]}"
     *)
         show_help
         ;;
