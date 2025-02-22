@@ -16,27 +16,37 @@ function get_gh_repos() {
     # GitHub CLI only supports public, private and internal as
     # arguments.
 
+    # Args:
+    #   VIS: Visibility of the repo (public, private, internal)
+    #   ORG: Name of the associated organisation.
+
+    VIS=$1
+    ORG=$2
+
     if [ -z $2 ]; then
-        echo $(gh repo list --visibility $1 --json name --jq '.[].name')
+        echo $(gh repo list --visibility $VIS --json name --jq '.[].name')
     else
-        echo $(gh repo list $2 --visibility $1 --json name --jq '.[].name')
+        echo $(gh repo list $ORG --visibility $VIS --json name --jq '.[].name')
     fi
 }
 
-function clone_or_pull() {
-    # Clones or pulls a repository from GitHub depending on
-    # whether it already exists at the target_dir path.
+function cloner() {
+    # Clones a repository from GitHub
 
-    TARGET_DIR=$1
+    REPO_PATH=$1
     REPO_NAME=$2
 
-    REPO_PATH=$TARGET_DIR/$REPO_NAME
+    printf "$(tput setaf 2)\nCloning $REPO_NAME to $REPO_PATH\n"
+    gh repo clone $REPO_NAME $REPO_PATH
+    return
 
-    if [ ! -d $REPO_PATH ]; then
-        printf "$(tput setaf 2)\nCloning $REPO_NAME to $REPO_PATH\n"
-        gh repo clone $repo $REPO_PATH
-        exit 1
-    fi
+}
+
+function puller() {
+    # Pulls a repository in case it already exists.
+
+    REPO_PATH=$1
+    REPO_NAME=$2
 
     cd $REPO_PATH
 
@@ -47,48 +57,72 @@ function clone_or_pull() {
     PREV_BRANCH=$(git branch --show-current)
     HAS_CHANGES=$(git status --porcelain)
 
-    if [ "$PREV_BRANCH" != "$DEFAULT_BRANCH" ] && [ -n $HAS_CHANGES ]; then
+    if [[ -n $HAS_CHANGES ]]; then
 
-        if git stash; then
+        if git stash --all &>/dev/null; then
             printf "$(tput setaf 2)\nStashed changes on $PREV_BRANCH in $repo\n"
         else
             printf "$(tput setaf 3)\nUnable to stash changes on $PREV_BRANCH in $repo\n"
             printf "$(tput setaf 3)\nTo avoid losing work, continuing\n"
-            exit 1
+            return
         fi
+    fi
 
-        if git checkout $DEFAULT_BRANCH; then
-            printf "$(tput setaf 2)\nChecked out $DEFAULT_BRANCH\n"
-        else
-            printf "$(tput setaf 3)\nCannot checkout $DEFAULT_BRANCH in $repo\n"
-            printf "$(tput setaf 3)\nPlease look at the repo and find any issues.\n"
-            exit 1
-        fi
+    if git checkout $DEFAULT_BRANCH &>/dev/null; then
+        printf "$(tput setaf 2)\nChecked out $DEFAULT_BRANCH\n"
+    else
+        printf "$(tput setaf 3)\nCannot checkout $DEFAULT_BRANCH in $repo\n"
+        printf "$(tput setaf 3)\nPlease look at the repo and find any issues.\n"
+        return
     fi
 
     git pull
 
-    if [ -n "$PREV_BRANCH" ]; then
+    if [[ -n "$HAS_CHANGES" ]]; then
 
-        if git checkout $PREV_BRANCH; then
+        if git checkout $PREV_BRANCH &>/dev/null; then
             printf "$(tput setaf 2)\nChecked out $PREV_BRANCH in $repo\n"
         else
             printf "$(tput setaf 3)\nUnable to checkout $PREV_BRANCH in $repo\n"
             printf "$(tput setaf 3)\nCannot unstash previous changes. Continuing\n"
-            exit 1
+            return
+        fi
 
-        if git stash pop; then
+        if git stash pop &>/dev/null; then
             printf "$(tput setaf 2)\nReapplied changes on $PREV_BRANCH in $repo\n"
         else
             printf "$(tput setaf 3)\nUnable to unstash changes on $PREV_BRANCH in $repo\n"
             printf "$(tput setaf 3)\nPlease look at the repo and find any issues.\n"
-            exit 1
+            return
+        fi
     fi
 }
 
-function make_repo() {
+function clone_or_pull() {
+    # Clones or pulls a repository from GitHub depending on
+    # whether it already exists at the target_dir path.
+    # Args:
+    #   TARGET_DIR: Target directory for cloning into
+    #   REPO_NAME: Name of the repository
+
+    HOME_DIR=$1
+    REPO_NAME=$2
+
+    REPO_PATH=$HOME_DIR/$REPO_NAME
+
+    if [ ! -d $REPO_PATH ]; then
+        cloner $REPO_PATH $REPO_NAME
+    else
+        puller $REPO_PATH $REPO_NAME
+    fi
+}
+
+function make_dir() {
     # Creates a directory to hold a repository if it
     # does not already exist.
+    # Args:
+    #   TARGET_DIR: Target directory to make the repo in.
+    #   NAME: The name of the directory
 
     TARGET_DIR=$1
     NAME=$2
@@ -122,22 +156,22 @@ fi
 
 ORG_NAME=$2
 
-DIR_PATH=$(make_repo $TARGET_DIR "Private")
+DIR_PATH=$(make_dir $TARGET_DIR "Private")
 for repo in $(get_gh_repos "private" $ORG_NAME); do
     clone_or_pull $DIR_PATH $repo
 done
 
-DIR_PATH=$(make_repo $TARGET_DIR "Public")
+DIR_PATH=$(make_dir $TARGET_DIR "Public")
 for repo in $(get_gh_repos "public" $ORG_NAME); do
     clone_or_pull $DIR_PATH $repo
 done
 
-DIR_PATH=$(make_repo $TARGET_DIR "Forks")
+DIR_PATH=$(make_dir $TARGET_DIR "Forks")
 for repo in $(gh repo list --fork $ORG_NAME); do
     clone_or_pull $DIR_PATH $repo
 done
 
-DIR_PATH=$(make_repo $TARGET_DIR "Archive")
+DIR_PATH=$(make_dir $TARGET_DIR "Archive")
 for repo in $(gh repo list --archived $ORG_NAME); do
     clone_or_pull $DIR_PATH $repo
 done

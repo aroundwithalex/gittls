@@ -35,7 +35,7 @@ function parse_args() {
 
     COUNT=${#args[@]}
 
-    if (( $COUNT == $MIN_ARGS  )); then
+    if (( $COUNT == $MIN_ARGS )); then
         for arg in "${args[@]}"; do
             parsed_args+=("$arg")
         done
@@ -126,7 +126,7 @@ case $COMMAND in
         ;;
     'clone')
         parse_args "$@" 1
-        cloner "${parsed_args[0]}"
+        cloner "${parsed_args[0]}" "${parsed_args[1]}"
         ;;  
     'config')
         parse_args "$@" 2

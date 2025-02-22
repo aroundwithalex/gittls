@@ -6,12 +6,12 @@
 function unstash_changes() {
     # Unstashes changes within the given directory
 
-    if [ -z $1 ]; then
+    PREV_BRANCH=$1
+    if [ -z $PREV_BRANCH ]; then
         printf "$(tput setaf 1)\nBranch name was not specified\n"
         exit 1
     fi
 
-    PREV_BRANCH=$1
     if ! git checkout $PREV_BRANCH &>/dev/null; then
         printf "$(tput setaf 3)\nUnable to checkout $PREV_BRANCH\n"
         printf "$(tput setaf 3)\nContinuing\n"
