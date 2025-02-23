@@ -32,11 +32,13 @@ if [ ! -d ~/.local/share/gittls ]; then
     exit 1
 fi
 
-read -p "Are you sure you want to uninstall gittls? [y/N] " ACTION
+read -p "$(tput setaf 3)Are you sure you want to uninstall gittls? [y/N] " ACTION
 
 if [[ "$ACTION" =~ ^(y|Y)$ ]]; then
+    printf "$(tput setaf 3)\nUninstalling gittls\n"
     sudo rm -rf ~/.local/share/gittls
     remove_alias
+    printf "$(tput setaf 3)\ngittls successfully uninstalled\n"
 else
     printf "$(tput setaf 2)\nPlease update for the latest changes.\n"
     exit 0
