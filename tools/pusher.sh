@@ -35,9 +35,9 @@ for repo in $TARGET_DIR/*; do
     BRANCH=$(git rev-parse --abbrev-ref HEAD)
     HAS_CHANGES=$(git status --porcelain)
 
-    if [ "$BRANCH" != "$TARGET_BRANCH" ] && [ -n $HAS_CHANGES ]; then
+    if [[ -n $HAS_CHANGES ]]; then
 
-        if git stash; then
+        if git stash &>/dev/null; then
             printf "$(tput setaf 2)\nStashed changes on $BRANCH in $repo\n"
         else
             printf "$(tput setaf 3)\nUnable to stash changes on $BRANCH in $repo\n"
@@ -46,7 +46,7 @@ for repo in $TARGET_DIR/*; do
         fi
     fi
 
-    if git checkout $TARGET_BRANCH; then
+    if git checkout $TARGET_BRANCH &>/dev/null; then
         printf "$(tput setaf 2)\nChecked out $TARGET_BRANCH in $repo\n"
     else
         printf "$(tput setaf 3)\nUnable to checkout $TARGET_BRANCH in $repo\n"
@@ -54,21 +54,15 @@ for repo in $TARGET_DIR/*; do
         continue
     fi
 
-    if [ -n $(git status --porcelain) ]; then
-        printf "$(tput setaf 3)\nYou have uncommitted local changes\n"
-        printf "$(tput setaf 3)\nPlease commit or stash before continuing\n"
-        continue
-    fi
-
-    if ! git remote; then
+    if ! git remote &>/dev/null; then
         printf "$(tput setaf 3)\n$repo does not have a remote repository on GitHub\n"
         printf "$(tput setaf 3)\nPlease set one up before continuing\n"
         continue
     fi
 
-    if ! git rev-parse --abbrev-ref @{upstream} 2>/dev/null; then
+    if ! git rev-parse --abbrev-ref @{upstream} &>/dev/null; then
 
-        if git branch --set-upstream=origin/$TARGET_DIR; then
+        if git branch --set-upstream=origin/$TARGET_DIR &>/dev/null; then
             printf "$(tput setaf 2)\nSet upstream branch for $TARGET_BRANCH"
         else
             printf "$(tput setaf 3)\nUnable to set upstream branch for $TARGET_BRANCH\n"
@@ -78,10 +72,23 @@ for repo in $TARGET_DIR/*; do
     fi
 
     if git push; then
-        printf "$(tput setaf 2)\nPushed $TARGET_DIR to remote repository\n"
+        printf "$(tput setaf 2)\nPushed $BRANCH in $repo to remote repository\n"
     else
-        printf "$(tput setaf 3)\nUnable to push $TARGET_DIR to remote repository\n"
+        printf "$(tput setaf 3)\nUnable to push $BRANCH in $repo to remote repository\n"
         printf "$(tput setaf 3)\nPlease examine the repo and check for issues\n"
     fi
 
+    if [[ -n $HAS_CHANGES ]]; then
+
+        if ! git checkout $BRANCH &>/dev/null; then
+            printf "$(tput setaf 3)\nUnable to checkout $BRANCH\n"
+            continue
+        elif ! git stash pop &>/dev/null; then
+            printf "$(tput setaf 3)\nUnable to unstash changes on $BRANCH in $repo\n"
+            continue
+        else
+            printf "$(tput setaf 2)\nReapplied changes on $BRANCH in $repo\n"
+        fi
+    fi
+    
 done
