@@ -10,7 +10,7 @@ function determine_shell() {
         SHELL_PATH=~/.bashrc
     elif [ "$SHELL_NAME" == "zsh" ]; then
         SHELL_PATH=~/.zshrc
-    elif [ $"SHELL_NAME" == "fish" ]; then
+    elif [ "$SHELL_NAME" == "fish" ]; then
         SHELL_PATH=~/.config/fish/config.fish
     else
         printf "$(tput setaf 1)\nUnable to determine shell\n"
