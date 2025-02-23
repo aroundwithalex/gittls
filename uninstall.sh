@@ -2,7 +2,7 @@
 
 # Uninstalls and removes gittls from a machine
 
-function determine_shell() {
+function remove_alias() {
     SHELL_PATH=''
     SHELL_NAME=$(echo $SHELL | rev | cut -d '/' -f1 | rev)
 
@@ -17,13 +17,13 @@ function determine_shell() {
         exit 1
     fi
 
-    if [ ! -d $SHELL_PATH ]; then
+    if [ ! -f $SHELL_PATH ]; then
         printf "$(tput setaf 3)\n$SHELL_PATH does not exist\n"
         printf "$(tput setaf 3)\nNothing to do\n"
-        exit 0
+        exit 1
     fi
 
-    echo $SHELL_PATH
+    sed '/alias gittls=/d' $SHELL_PATH &> /dev/null
 }
 
 if [ ! -d ~/.local/share/gittls ]; then
@@ -36,7 +36,7 @@ read -p "Are you sure you want to uninstall gittls? [y/N] " ACTION
 
 if [[ "$ACTION" =~ ^(y|Y)$ ]]; then
     sudo rm -rf ~/.local/share/gittls
-    sed '/alias gittls=/d' $(determine_shell)
+    remove_alias
 else
     printf "$(tput setaf 2)\nPlease update for the latest changes.\n"
     exit 0
