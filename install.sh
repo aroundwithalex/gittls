@@ -8,6 +8,18 @@ fi
 
 cd ~/.local/share
 
+# Remove existing installation
+if [ -d gittls ]; then
+    read -p "$(tput setaf 3)Existing gittls installation found. Replace? [y/N] " ACTION
+
+    if [[ "$ACTION" =~ ^(y|Y)$ ]]; then
+        sudo rm -rf ~/.local/share/gittls
+    else
+        printf "$(tput setaf 2)\nPlease update for the latest changes\n"
+        exit 0
+    fi
+fi
+
 printf "$(tput setaf 2)\nInstalling gittls\n"
 
 git clone https://github.com/aroundwithalex/gittls.git --single-branch &> /dev/null

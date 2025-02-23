@@ -69,7 +69,7 @@ function brancher() {
         DEFAULT_BRANCH="main"
     fi
 
-    $(pwd)/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
+    source $INSTALL_PATH/tools/brancher.sh $NAME $TARGET_DIR $DEFAULT_BRANCH
 
 }
 
@@ -78,7 +78,7 @@ function cloner() {
     # as the target directory and (optionally) an organisation.
     TARGET_DIR=$1
     ORG=$2
-    source $(pwd)/tools/cloner.sh $TARGET_DIR $ORG
+    source $INSTALL_PATH/tools/cloner.sh $TARGET_DIR $ORG
 }
 
 function config() {
@@ -86,12 +86,12 @@ function config() {
     # the email address and name of the user.
     EMAIL=$1
     NAME=$2
-    source $(pwd)/tools/config.sh $EMAIL $NAME
+    source $INSTALL_PATH/tools/config.sh $EMAIL $NAME
 }
 
 function ssh_adder() {
     # Calls the SSH adder script.
-    source $(pwd)/tools/ssh_adder.sh
+    source $INSTALL_PATH/tools/ssh_adder.sh
 }
 
 function pull() {
@@ -99,7 +99,7 @@ function pull() {
     # as the target branch and the target directory.
     TARGET_BRANCH=$1
     TARGET_DIR=$2
-    source $(pwd)/tools/puller.sh $TARGET_BRANCH $TARGET_DIR
+    source $INSTALL_PATH/tools/puller.sh $TARGET_BRANCH $TARGET_DIR
 }
 
 function push() {
@@ -107,12 +107,22 @@ function push() {
     # as the target branch and the target directory.
     TARGET_BRANCH=$1
     TARGET_DIR=$2
-    source $(pwd)/tools/pusher.sh $TARGET_BRANCH $TARGET_DIR
+    source $INSTALL_PATH/tools/pusher.sh $TARGET_BRANCH $TARGET_DIR
 }
 
 function show_help() {
     # Shows the help menu.
-    source $(pwd)/help.sh
+    source $INSTALL_PATH/help.sh
+}
+
+function update() {
+    # Updates gittls locally
+    source $INSTALL_PATH/update.sh
+}
+
+function uninstall() {
+    # Removes gittls locally
+    source $INSTALL_PATH/uninstall.sh
 }
 
 INSTALL_PATH=~/.local/share/gittls
@@ -142,6 +152,12 @@ case $COMMAND in
     'push')
         parse_args "$@" 2
         push "${parsed_args[0]}" "${parsed_args[1]}"
+        ;;
+    'update')
+        update
+        ;;
+    'uninstall')
+        uninstall
         ;;
     *)
         show_help
