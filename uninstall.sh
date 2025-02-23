@@ -35,7 +35,7 @@ fi
 read -p "Are you sure you want to uninstall gittls? [y/N] " ACTION
 
 if [[ "$ACTION" =~ ^(y|Y)$ ]]; then
-    # sudo rm -rf ~/.local/share/gittls
+    sudo rm -rf ~/.local/share/gittls
     remove_alias
 else
     printf "$(tput setaf 2)\nPlease update for the latest changes.\n"
