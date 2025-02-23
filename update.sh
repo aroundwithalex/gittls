@@ -4,7 +4,7 @@
 
 if [[ -n $(git status --porcelain ) ]]; then
 
-    if ! git stash --all &>/dev/null;
+    if ! git stash --all &>/dev/null; then
         printf "$(tput setaf 1)\nUnable to stash local changes\n"
         printf "$(tput setaf 1)\nPlease reinstall\n"
         exit 1
